@@ -5,7 +5,7 @@
  * @license [New BSD License](http://www.opensource.org/licenses/bsd-license.php)
  */
 
-namespace Illuminatech\MultipartMiddleware;
+namespace Hivelocityinc\MultipartMiddleware;
 
 use Closure;
 use Illuminate\Http\Request;
@@ -95,7 +95,7 @@ class MultipartFormDataParser
     public function getUploadFileMaxCount(): int
     {
         if ($this->uploadFileMaxCount === null) {
-            $this->uploadFileMaxCount = ini_get('max_file_uploads');
+            $this->uploadFileMaxCount = ini_get("max_file_uploads");
         }
 
         return $this->uploadFileMaxCount;
@@ -122,7 +122,10 @@ class MultipartFormDataParser
     public function handle(Request $request, Closure $next, $force = false)
     {
         if (!$force) {
-            if ($request->getRealMethod() === 'POST' || count($request->files) > 0) {
+            if (
+                $request->getRealMethod() === "POST" ||
+                count($request->files) > 0
+            ) {
                 // normal POST request is parsed by PHP automatically
                 return $next($request);
             }
@@ -141,11 +144,11 @@ class MultipartFormDataParser
      */
     public function parse(Request $request): Request
     {
-        $contentType = $request->headers->get('CONTENT_TYPE');
+        $contentType = $request->headers->get("CONTENT_TYPE");
         if (empty($contentType)) {
             return $request;
         }
-        if (stripos($contentType, 'multipart/form-data') === false) {
+        if (stripos($contentType, "multipart/form-data") === false) {
             return $request;
         }
         if (!preg_match('/boundary=(.*)$/is', $contentType, $matches)) {
@@ -158,7 +161,10 @@ class MultipartFormDataParser
             return $request;
         }
 
-        $bodyParts = preg_split('/\\R?-+' . preg_quote($boundary, '/') . '/s', $rawBody);
+        $bodyParts = preg_split(
+            "/\\R?-+" . preg_quote($boundary, "/") . "/s",
+            $rawBody
+        );
         array_pop($bodyParts); // last block always has no data, contains boundary ending like `--`
 
         $bodyParams = [];
@@ -169,24 +175,28 @@ class MultipartFormDataParser
                 continue;
             }
 
-            [$headers, $value] = preg_split('/\\R\\R/', $bodyPart, 2);
+            [$headers, $value] = preg_split("/\\R\\R/", $bodyPart, 2);
             $headers = $this->parseHeaders($headers);
 
-            if (!isset($headers['content-disposition']['name'])) {
+            if (!isset($headers["content-disposition"]["name"])) {
                 continue;
             }
 
-            if (isset($headers['content-disposition']['filename'])) {
+            if (isset($headers["content-disposition"]["filename"])) {
                 // file upload:
                 if ($filesCount >= $this->getUploadFileMaxCount()) {
                     continue;
                 }
 
-                $clientFilename = $headers['content-disposition']['filename'];
-                $clientMediaType = Arr::get($headers, 'content-type', 'application/octet-stream');
-                $size = mb_strlen($value, '8bit');
+                $clientFilename = $headers["content-disposition"]["filename"];
+                $clientMediaType = Arr::get(
+                    $headers,
+                    "content-type",
+                    "application/octet-stream"
+                );
+                $size = mb_strlen($value, "8bit");
                 $error = UPLOAD_ERR_OK;
-                $tempFilename = '';
+                $tempFilename = "";
 
                 if ($size > $this->getUploadFileMaxSize()) {
                     $error = UPLOAD_ERR_INI_SIZE;
@@ -196,8 +206,10 @@ class MultipartFormDataParser
                     if ($tmpResource === false) {
                         $error = UPLOAD_ERR_CANT_WRITE;
                     } else {
-                        $tmpResourceMetaData = stream_get_meta_data($tmpResource);
-                        $tmpFileName = $tmpResourceMetaData['uri'];
+                        $tmpResourceMetaData = stream_get_meta_data(
+                            $tmpResource
+                        );
+                        $tmpFileName = $tmpResourceMetaData["uri"];
 
                         if (empty($tmpFileName)) {
                             $error = UPLOAD_ERR_CANT_WRITE;
@@ -212,7 +224,7 @@ class MultipartFormDataParser
 
                 $this->addValue(
                     $uploadedFiles,
-                    $headers['content-disposition']['name'],
+                    $headers["content-disposition"]["name"],
                     $this->createUploadedFile(
                         $tempFilename,
                         $clientFilename,
@@ -224,7 +236,11 @@ class MultipartFormDataParser
                 $filesCount++;
             } else {
                 // regular parameter:
-                $this->addValue($bodyParams, $headers['content-disposition']['name'], $value);
+                $this->addValue(
+                    $bodyParams,
+                    $headers["content-disposition"]["name"],
+                    $value
+                );
             }
         }
 
@@ -240,8 +256,11 @@ class MultipartFormDataParser
      * @param  array  $uploadedFiles parsed uploaded files.
      * @return \Illuminate\Http\Request new request instance.
      */
-    protected function newRequest(Request $originalRequest, array $bodyParams, array $uploadedFiles): Request
-    {
+    protected function newRequest(
+        Request $originalRequest,
+        array $bodyParams,
+        array $uploadedFiles
+    ): Request {
         $request = clone $originalRequest;
 
         $request->request = new InputBag($bodyParams);
@@ -259,9 +278,19 @@ class MultipartFormDataParser
      * @param  int|null  $error the error associated with the uploaded file.
      * @return \Symfony\Component\HttpFoundation\File\UploadedFile|object new uploaded file instance.
      */
-    protected function createUploadedFile(string $tempFilename, string $clientFilename, string $clientMediaType = null, int $error = null)
-    {
-        return new UploadedFile($tempFilename, $clientFilename, $clientMediaType, $error, true);
+    protected function createUploadedFile(
+        string $tempFilename,
+        string $clientFilename,
+        string $clientMediaType = null,
+        int $error = null
+    ) {
+        return new UploadedFile(
+            $tempFilename,
+            $clientFilename,
+            $clientMediaType,
+            $error,
+            true
+        );
     }
 
     /**
@@ -273,29 +302,41 @@ class MultipartFormDataParser
     private function parseHeaders(string $headerContent): array
     {
         $headers = [];
-        $headerParts = preg_split('/\\R/s', $headerContent, -1, PREG_SPLIT_NO_EMPTY);
+        $headerParts = preg_split(
+            "/\\R/s",
+            $headerContent,
+            -1,
+            PREG_SPLIT_NO_EMPTY
+        );
 
         foreach ($headerParts as $headerPart) {
-            if (strpos($headerPart, ':') === false) {
+            if (strpos($headerPart, ":") === false) {
                 continue;
             }
 
-            [$headerName, $headerValue] = explode(':', $headerPart, 2);
+            [$headerName, $headerValue] = explode(":", $headerPart, 2);
             $headerName = strtolower(trim($headerName));
             $headerValue = trim($headerValue);
 
-            if (strpos($headerValue, ';') === false) {
+            if (strpos($headerValue, ";") === false) {
                 $headers[$headerName] = $headerValue;
             } else {
                 $headers[$headerName] = [];
-                foreach (explode(';', $headerValue) as $part) {
+                foreach (explode(";", $headerValue) as $part) {
                     $part = trim($part);
-                    if (strpos($part, '=') === false) {
+                    if (strpos($part, "=") === false) {
                         $headers[$headerName][] = $part;
                     } else {
-                        [$name, $value] = explode('=', $part, 2);
+                        [$name, $value] = explode("=", $part, 2);
                         $name = strtolower(trim($name));
                         $value = trim(trim($value), '"');
+                        // Decode filename if it's likely URL encoded
+                        if (
+                            $name === "filename" &&
+                            $this->isUrlEncoded($value)
+                        ) {
+                            $value = urldecode($value);
+                        }
                         $headers[$headerName][$name] = $value;
                     }
                 }
@@ -314,11 +355,11 @@ class MultipartFormDataParser
      */
     private function addValue(&$array, $name, $value): void
     {
-        $nameParts = preg_split('/\\]\\[|\\[/s', $name);
+        $nameParts = preg_split("/\\]\\[|\\[/s", $name);
         $current = &$array;
         foreach ($nameParts as $namePart) {
-            $namePart = trim($namePart, ']');
-            if ($namePart === '') {
+            $namePart = trim($namePart, "]");
+            if ($namePart === "") {
                 $current[] = [];
                 $keys = array_keys($current);
                 $lastKey = array_pop($keys);
@@ -331,6 +372,18 @@ class MultipartFormDataParser
             }
         }
         $current = $value;
+    }
+
+    /**
+     * Check if a string appears to be URL-encoded.
+     *
+     * @param string $value The string to check.
+     * @return bool True if the string appears to be URL-encoded, false otherwise.
+     */
+    private function isUrlEncoded(string $value): bool
+    {
+        return rawurldecode($value) !== $value ||
+            preg_match("/%[0-9a-fA-F]{2}/", $value) === 1;
     }
 
     /**

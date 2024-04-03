@@ -1,6 +1,6 @@
 <?php
 
-namespace Illuminatech\MultipartMiddleware\Test;
+namespace Hivelocityinc\MultipartMiddleware\Test;
 
 /**
  * Base class for the test cases.

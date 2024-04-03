@@ -1,38 +1,46 @@
 {
-    "name": "illuminatech/multipart-middleware",
-    "description": "'multipart/form-data' parser middleware for Laravel",
-    "keywords": ["laravel", "middleware", "multipart", "request", "parser", "file", "upload"],
-    "license": "BSD-3-Clause",
-    "support": {
-        "issues": "https://github.com/illuminatech/multipart-middleware/issues",
-        "wiki": "https://github.com/illuminatech/multipart-middleware/wiki",
-        "source": "https://github.com/illuminatech/multipart-middleware"
-    },
-    "authors": [
-        {
-            "name": "Paul Klimov",
-            "email": "klimov.paul@gmail.com"
-        }
-    ],
-    "require": {
-        "illuminate/http": "^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^7.5 || ^8.0 || ^9.3 || ^10.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "Illuminatech\\MultipartMiddleware\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Illuminatech\\MultipartMiddleware\\Test\\": "tests"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0.x-dev"
-        }
+  "name": "illuminatech/multipart-middleware",
+  "description": "'multipart/form-data' parser middleware for Laravel",
+  "keywords": [
+    "laravel",
+    "middleware",
+    "multipart",
+    "request",
+    "parser",
+    "file",
+    "upload"
+  ],
+  "license": "BSD-3-Clause",
+  "support": {
+    "issues": "https://github.com/illuminatech/multipart-middleware/issues",
+    "wiki": "https://github.com/illuminatech/multipart-middleware/wiki",
+    "source": "https://github.com/illuminatech/multipart-middleware"
+  },
+  "authors": [
+    {
+      "name": "Paul Klimov",
+      "email": "klimov.paul@gmail.com"
     }
+  ],
+  "require": {
+    "illuminate/http": "^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.5 || ^8.0 || ^9.3 || ^10.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Hivelocityinc\\MultipartMiddleware\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Hivelocityinc\\MultipartMiddleware\\Test\\": "tests"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev"
+    }
+  }
 }
